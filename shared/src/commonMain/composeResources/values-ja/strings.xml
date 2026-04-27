@@ -28,6 +28,8 @@
     <string name="label_recognize_from_clipboard">クリップボードから認識</string>
     <string name="text_recognize_no_detection">牌が検出されません</string>
     <string name="text_clipboard_no_image">クリップボードに画像がありません</string>
+    <string name="text_screen_region_recognizer_focus_input_first">先に麻雀牌入力欄へフォーカスしてください</string>
+    <string name="text_screen_region_recognizer_select_area_first">先に認識する画面領域を選択してください</string>
 
     <string name="text_empty_history">なし</string>
 

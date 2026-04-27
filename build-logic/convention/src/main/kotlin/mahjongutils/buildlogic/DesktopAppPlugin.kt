@@ -32,7 +32,12 @@ class DesktopAppPlugin : Plugin<Project> {
     }
 
     private fun Project.configKotlin() {
-        kotlinExtension.jvmToolchain(libs.findVersion("java-targetJvm").get().toString().toInt())
+        val defaultToolchainVersion = libs.findVersion("java-targetJvm").get().toString().toInt()
+        val toolchainVersion = providers.gradleProperty("mahjongutils.desktop.jvmToolchain")
+            .map { it.toInt() }
+            .orElse(defaultToolchainVersion)
+            .get()
+        kotlinExtension.jvmToolchain(toolchainVersion)
     }
 
     private fun Project.configComposeDesktop() {

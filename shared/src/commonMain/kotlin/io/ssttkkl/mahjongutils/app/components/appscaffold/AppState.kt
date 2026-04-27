@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.Density
 import dev.shreyaspatil.capturable.controller.CaptureController
 import dev.shreyaspatil.capturable.controller.rememberCaptureController
 import io.ssttkkl.mahjongutils.app.base.utils.LoggerFactory
+import io.ssttkkl.mahjongutils.app.components.tileime.TileImeHostState
 
 @Stable
 class AppState(
@@ -29,6 +30,7 @@ class AppState(
     val snackbarHostState = SnackbarHostState()
     var appDialogState by mutableStateOf(AppDialogState.NONE)
     var appBottomSheetState by mutableStateOf(AppBottomSheetState(density))
+    var lastTileInputHandler by mutableStateOf<((TileImeHostState.ImeAction) -> Unit)?>(null)
 
     // 因为navigator能够嵌套
     val appBarStateList = mutableStateListOf<AppBarState?>()

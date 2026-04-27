@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.TextUnit
 import com.quadible.feather.LocalFloatingDraggableState
 import io.ssttkkl.mahjongutils.app.base.utils.PlatformUtils
 import io.ssttkkl.mahjongutils.app.components.onRightClick
+import io.ssttkkl.mahjongutils.app.components.appscaffold.LocalAppState
 import io.ssttkkl.mahjongutils.app.components.tapPress
 import io.ssttkkl.mahjongutils.app.components.tileime.LocalTileImeHostState
 import io.ssttkkl.mahjongutils.app.components.tileime.TileImeHostState
@@ -139,10 +140,19 @@ private fun BaseTileField(
     }
 
     val coroutineScope = rememberCoroutineScope()
+    val appState = LocalAppState.current
 
     val tileImeHostState = LocalTileImeHostState.current
     val consumer = remember(state, tileImeHostState) {
         tileImeHostState.TileImeConsumer()
+    }
+    val externalActionHandler = remember(state, coroutineScope) {
+        { action: TileImeHostState.ImeAction ->
+            coroutineScope.launch {
+                state.handleImeAction(action)
+            }
+            Unit
+        }
     }
 
     LaunchedEffect(valueState.value) {
@@ -154,6 +164,9 @@ private fun BaseTileField(
     DisposableEffect(consumer) {
         onDispose {
             consumer.release()
+            if (appState.lastTileInputHandler === externalActionHandler) {
+                appState.lastTileInputHandler = null
+            }
         }
     }
 
@@ -162,6 +175,7 @@ private fun BaseTileField(
     LaunchedEffect(enabled && focused) {
         if (enabled && focused) {
             consumer.consume(state::handleImeAction)
+            appState.lastTileInputHandler = externalActionHandler
         } else {
             consumer.release()
         }

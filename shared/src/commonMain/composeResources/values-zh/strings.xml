@@ -28,6 +28,8 @@
     <string name="label_recognize_from_clipboard">从剪切板识别</string>
     <string name="text_recognize_no_detection">未检测到麻将牌</string>
     <string name="text_clipboard_no_image">剪切板中没有图片</string>
+    <string name="text_screen_region_recognizer_focus_input_first">请先聚焦一个麻将牌输入框</string>
+    <string name="text_screen_region_recognizer_select_area_first">请先框选要识别的屏幕区域</string>
 
     <string name="text_empty_history">空</string>
 

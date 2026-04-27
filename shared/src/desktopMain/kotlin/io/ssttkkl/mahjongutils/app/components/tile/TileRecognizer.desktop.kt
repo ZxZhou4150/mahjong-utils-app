@@ -8,7 +8,9 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -18,7 +20,6 @@ import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.asAwtTransferable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.WindowPosition
 import com.attafitamim.krop.core.crop.ImageCropper
 import com.attafitamim.krop.core.crop.rememberImageCropper
 import io.ssttkkl.mahjongutils.app.base.components.ImageCropperDialog
@@ -27,20 +28,17 @@ import io.ssttkkl.mahjongutils.app.components.appscaffold.AppState
 import io.ssttkkl.mahjongutils.app.components.appscaffold.LocalMainWindowState
 import io.ssttkkl.mahjongutils.app.components.tileime.TileImeHostState
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import mahjongutils.composeapp.generated.resources.Res
 import mahjongutils.composeapp.generated.resources.icon_screenshot_frame
 import mahjongutils.composeapp.generated.resources.label_recognize_from_screenshot
+import mahjongutils.composeapp.generated.resources.text_screen_region_recognizer_focus_input_first
+import mahjongutils.composeapp.generated.resources.text_screen_region_recognizer_select_area_first
 import mahjongutils.composeapp.generated.resources.title_crop_image
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
 import java.awt.Image
-import java.awt.Rectangle
-import java.awt.Robot
-import java.awt.Toolkit
 import java.awt.datatransfer.DataFlavor
-import java.awt.image.BufferedImage
 import java.io.File
 import java.nio.file.Files
 import javax.imageio.ImageIO
@@ -66,9 +64,8 @@ actual class TileRecognizer actual constructor(
         onAction: (TileImeHostState.ImeAction) -> Unit,
         onDismissRequest: () -> Unit
     ) {
-        val mainWindowState = LocalMainWindowState.current
+        val screenRegionRecognizerController = LocalScreenRegionRecognizerController.current
 
-        val curOnAction by rememberUpdatedState(onAction)
         val curOnDismissRequest by rememberUpdatedState(onDismissRequest)
 
         DropdownMenuItem(
@@ -83,34 +80,7 @@ actual class TileRecognizer actual constructor(
             },
             onClick = {
                 curOnDismissRequest()
-
-                coroutineScope.launch {
-                    var image: BufferedImage? = null
-
-                    // 把窗口移出屏幕外再截屏，然后恢复
-                    val curLocation = mainWindowState.position
-                    try {
-                        logger.info("start capture")
-                        mainWindowState.position = WindowPosition(100000.dp, 100000.dp)
-                        image = withContext(Dispatchers.IO) {
-                            Robot().createScreenCapture(
-                                Rectangle(
-                                    Toolkit.getDefaultToolkit().screenSize
-                                )
-                            )
-                        }
-                        logger.info("capture image: ${image.height}*${image.width}")
-                    } catch (e: Exception) {
-                        logger.error(e)
-                    } finally {
-                        logger.info("finish capture")
-                        mainWindowState.position = curLocation
-                    }
-
-                    image?.let { image ->
-                        cropAndRecognizeAndFillFromBitmap(image.toComposeImageBitmap(), curOnAction)
-                    }
-                }
+                screenRegionRecognizerController.beginSelection()
             }
         )
     }
@@ -182,9 +152,37 @@ actual fun TileRecognizerHost(
     val cropper = rememberImageCropper()
     val tileRecognizer =
         rememberTileRecognizer(cropper, appState.snackbarHostState)
+    val mainWindowState = LocalMainWindowState.current
+    val focusRequiredMessage = stringResource(Res.string.text_screen_region_recognizer_focus_input_first)
+    val noSelectionMessage = stringResource(Res.string.text_screen_region_recognizer_select_area_first)
+    val screenRegionRecognizerController = remember(
+        appState,
+        tileRecognizer,
+        mainWindowState,
+        focusRequiredMessage,
+        noSelectionMessage
+    ) {
+        ScreenRegionRecognizerController(
+            appState = appState,
+            tileRecognizer = tileRecognizer,
+            getMainWindowPosition = { mainWindowState.position },
+            setMainWindowPosition = { mainWindowState.position = it },
+            focusRequiredMessage = focusRequiredMessage,
+            noSelectionMessage = noSelectionMessage
+        )
+    }
+
+    DisposableEffect(screenRegionRecognizerController) {
+        val keyDispatcherRegistration = registerScreenRegionKeyDispatcher(screenRegionRecognizerController)
+        onDispose {
+            keyDispatcherRegistration.close()
+            screenRegionRecognizerController.dispose()
+        }
+    }
 
     CompositionLocalProvider(
-        LocalTileRecognizer provides tileRecognizer
+        LocalTileRecognizer provides tileRecognizer,
+        LocalScreenRegionRecognizerController provides screenRegionRecognizerController
     ) {
         content()
     }

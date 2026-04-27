@@ -28,6 +28,8 @@
     <string name="label_recognize_from_clipboard">Recognize from Clipboard</string>
     <string name="text_recognize_no_detection">No mahjong tiles detected</string>
     <string name="text_clipboard_no_image">No image in clipboard</string>
+    <string name="text_screen_region_recognizer_focus_input_first">Focus a mahjong tile input field first</string>
+    <string name="text_screen_region_recognizer_select_area_first">Select a screen area first</string>
 
     <string name="text_empty_history">Empty</string>
 
