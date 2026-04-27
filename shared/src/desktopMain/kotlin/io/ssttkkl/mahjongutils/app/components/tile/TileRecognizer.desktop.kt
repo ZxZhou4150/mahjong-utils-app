@@ -182,7 +182,11 @@ actual fun TileRecognizerHost(
     }
 
     DisposableEffect(screenRegionRecognizerController) {
-        val keyDispatcherRegistration = registerScreenRegionKeyDispatcher(screenRegionRecognizerController)
+        val keyDispatcherRegistration = registerScreenRegionKeyDispatcher(
+            screenRegionRecognizerController
+        ) {
+            appOptions.desktopScreenRegionShortcutOptions
+        }
         onDispose {
             keyDispatcherRegistration.close()
             screenRegionRecognizerController.dispose()
