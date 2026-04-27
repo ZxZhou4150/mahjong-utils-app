@@ -9,4 +9,7 @@ actual object PlatformUtils {
                 window.navigator.userAgent.contains(it, ignoreCase = true)
             }
         }
+
+    actual val isDesktop: Boolean
+        get() = false
 }

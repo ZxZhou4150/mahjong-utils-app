@@ -12,6 +12,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -27,6 +28,7 @@ import io.ssttkkl.mahjongutils.app.base.utils.toBufferedImage
 import io.ssttkkl.mahjongutils.app.components.appscaffold.AppState
 import io.ssttkkl.mahjongutils.app.components.appscaffold.LocalMainWindowState
 import io.ssttkkl.mahjongutils.app.components.tileime.TileImeHostState
+import io.ssttkkl.mahjongutils.app.models.AppOptions
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import mahjongutils.composeapp.generated.resources.Res
@@ -34,6 +36,7 @@ import mahjongutils.composeapp.generated.resources.icon_screenshot_frame
 import mahjongutils.composeapp.generated.resources.label_recognize_from_screenshot
 import mahjongutils.composeapp.generated.resources.text_screen_region_recognizer_focus_input_first
 import mahjongutils.composeapp.generated.resources.text_screen_region_recognizer_select_area_first
+import mahjongutils.composeapp.generated.resources.text_screen_region_recognizer_unsupported
 import mahjongutils.composeapp.generated.resources.title_crop_image
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.resources.vectorResource
@@ -152,23 +155,29 @@ actual fun TileRecognizerHost(
     val cropper = rememberImageCropper()
     val tileRecognizer =
         rememberTileRecognizer(cropper, appState.snackbarHostState)
+    val appOptions by AppOptions.datastore.data.collectAsState(AppOptions())
     val mainWindowState = LocalMainWindowState.current
     val focusRequiredMessage = stringResource(Res.string.text_screen_region_recognizer_focus_input_first)
     val noSelectionMessage = stringResource(Res.string.text_screen_region_recognizer_select_area_first)
+    val unsupportedMessage = stringResource(Res.string.text_screen_region_recognizer_unsupported)
     val screenRegionRecognizerController = remember(
         appState,
         tileRecognizer,
         mainWindowState,
+        appOptions.desktopScreenRegionShortcutOptions,
         focusRequiredMessage,
-        noSelectionMessage
+        noSelectionMessage,
+        unsupportedMessage
     ) {
         ScreenRegionRecognizerController(
             appState = appState,
             tileRecognizer = tileRecognizer,
             getMainWindowPosition = { mainWindowState.position },
             setMainWindowPosition = { mainWindowState.position = it },
+            getShortcutOptions = { appOptions.desktopScreenRegionShortcutOptions },
             focusRequiredMessage = focusRequiredMessage,
-            noSelectionMessage = noSelectionMessage
+            noSelectionMessage = noSelectionMessage,
+            unsupportedMessage = unsupportedMessage
         )
     }
 

@@ -13,6 +13,7 @@
     <string name="title_about_appversion">App Version</string>
     <string name="title_about_opensource_repo">Open-Source Repository</string>
     <string name="title_about_opensource_licenses">Open-Source License</string>
+    <string name="title_screen_region_shortcuts">Screen Recognition Shortcuts</string>
 
     <string name="title_crop_image">Crop Image</string>
 
@@ -30,6 +31,19 @@
     <string name="text_clipboard_no_image">No image in clipboard</string>
     <string name="text_screen_region_recognizer_focus_input_first">Focus a mahjong tile input field first</string>
     <string name="text_screen_region_recognizer_select_area_first">Select a screen area first</string>
+    <string name="text_screen_region_recognizer_unsupported">Screen region recognition is only supported on Windows and macOS</string>
+    <string name="text_screen_region_shortcut_desc">Customize the shortcuts used to select, recognize, and exit the persistent screen capture region.</string>
+    <string name="text_screen_region_shortcut_action_select">Start or reselect region</string>
+    <string name="text_screen_region_shortcut_action_recognize">Recognize selected region</string>
+    <string name="text_screen_region_shortcut_action_exit">Exit selection mode</string>
+    <string name="text_screen_region_shortcut_exit_hint">Esc always exits selection mode even if you change this shortcut.</string>
+    <string name="text_screen_region_shortcut_conflict">Shortcuts must be different from each other.</string>
+    <string name="text_screen_region_shortcut_mod_ctrl">Ctrl</string>
+    <string name="text_screen_region_shortcut_mod_alt">Alt</string>
+    <string name="text_screen_region_shortcut_mod_shift">Shift</string>
+    <string name="text_screen_region_shortcut_mod_meta">Meta / Command</string>
+    <string name="label_restore_default">Restore Default</string>
+    <string name="label_save">Save</string>
 
     <string name="text_empty_history">Empty</string>
 

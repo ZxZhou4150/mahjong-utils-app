@@ -8,7 +8,9 @@ import mahjongutils.hora.HoraOptions
 @Serializable
 data class AppOptions(
     val horaOptions: HoraOptions = HoraOptions.Default,
-    val hanHuOptions: HanHuOptions = HanHuOptions.Default
+    val hanHuOptions: HanHuOptions = HanHuOptions.Default,
+    val desktopScreenRegionShortcutOptions: DesktopScreenRegionShortcutOptions =
+        DesktopScreenRegionShortcutOptions.Default
 ) {
     companion object {
         val datastore = createDataStore(

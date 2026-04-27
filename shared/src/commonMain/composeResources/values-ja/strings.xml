@@ -13,6 +13,7 @@
     <string name="title_about_appversion">アプリバージョン</string>
     <string name="title_about_opensource_repo">オープンソースレポジトリ</string>
     <string name="title_about_opensource_licenses">オープンソースライセンス</string>
+    <string name="title_screen_region_shortcuts">画面認識ショートカット</string>
 
     <string name="title_crop_image">画像をトリミング</string>
 
@@ -30,6 +31,19 @@
     <string name="text_clipboard_no_image">クリップボードに画像がありません</string>
     <string name="text_screen_region_recognizer_focus_input_first">先に麻雀牌入力欄へフォーカスしてください</string>
     <string name="text_screen_region_recognizer_select_area_first">先に認識する画面領域を選択してください</string>
+    <string name="text_screen_region_recognizer_unsupported">画面領域認識は現在 Windows と macOS のみ対応しています</string>
+    <string name="text_screen_region_shortcut_desc">固定された画面選択領域の選択、認識、終了に使うショートカットを設定します。</string>
+    <string name="text_screen_region_shortcut_action_select">領域を開始または再選択</string>
+    <string name="text_screen_region_shortcut_action_recognize">選択領域を認識</string>
+    <string name="text_screen_region_shortcut_action_exit">選択モードを終了</string>
+    <string name="text_screen_region_shortcut_exit_hint">このショートカットを変更しても、Esc では常に選択モードを終了できます。</string>
+    <string name="text_screen_region_shortcut_conflict">ショートカットは互いに重複できません。</string>
+    <string name="text_screen_region_shortcut_mod_ctrl">Ctrl</string>
+    <string name="text_screen_region_shortcut_mod_alt">Alt</string>
+    <string name="text_screen_region_shortcut_mod_shift">Shift</string>
+    <string name="text_screen_region_shortcut_mod_meta">Meta / Command</string>
+    <string name="label_restore_default">初期設定に戻す</string>
+    <string name="label_save">保存</string>
 
     <string name="text_empty_history">なし</string>
 

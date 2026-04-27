@@ -47,6 +47,13 @@ kotlin {
             }
         }
 
+        val desktopMain by getting {
+            dependencies {
+                implementation(libs.jna)
+                implementation(libs.jna.platform)
+            }
+        }
+
         if (enableIos) {
             extensions.getByType<CocoapodsExtension>().apply {
                 framework {

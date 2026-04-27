@@ -8,4 +8,7 @@ actual object PlatformUtils {
             val os = System.getProperty("os.name").lowercase(Locale.getDefault())
             return os.contains("mac") || os.contains("darwin")
         }
+
+    actual val isDesktop: Boolean
+        get() = true
 }

@@ -13,6 +13,7 @@
     <string name="title_about_appversion">应用程序版本</string>
     <string name="title_about_opensource_repo">开放源代码仓库</string>
     <string name="title_about_opensource_licenses">开放源代码许可</string>
+    <string name="title_screen_region_shortcuts">屏幕识别快捷键</string>
 
     <string name="title_crop_image">图片裁剪</string>
 
@@ -30,6 +31,19 @@
     <string name="text_clipboard_no_image">剪切板中没有图片</string>
     <string name="text_screen_region_recognizer_focus_input_first">请先聚焦一个麻将牌输入框</string>
     <string name="text_screen_region_recognizer_select_area_first">请先框选要识别的屏幕区域</string>
+    <string name="text_screen_region_recognizer_unsupported">屏幕区域识别目前仅支持 Windows 和 macOS</string>
+    <string name="text_screen_region_shortcut_desc">自定义用于框选、识别和退出持久选区模式的快捷键。</string>
+    <string name="text_screen_region_shortcut_action_select">开始或重新框选区域</string>
+    <string name="text_screen_region_shortcut_action_recognize">识别已选区域</string>
+    <string name="text_screen_region_shortcut_action_exit">退出选区模式</string>
+    <string name="text_screen_region_shortcut_exit_hint">即使修改了此快捷键，Esc 仍始终可以退出选区模式。</string>
+    <string name="text_screen_region_shortcut_conflict">几个快捷键不能设置成相同。</string>
+    <string name="text_screen_region_shortcut_mod_ctrl">Ctrl</string>
+    <string name="text_screen_region_shortcut_mod_alt">Alt</string>
+    <string name="text_screen_region_shortcut_mod_shift">Shift</string>
+    <string name="text_screen_region_shortcut_mod_meta">Meta / Command</string>
+    <string name="label_restore_default">恢复默认</string>
+    <string name="label_save">保存</string>
 
     <string name="text_empty_history">空</string>
 

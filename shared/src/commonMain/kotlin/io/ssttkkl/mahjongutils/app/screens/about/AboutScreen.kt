@@ -12,8 +12,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import cafe.adriel.voyager.navigator.LocalNavigator
 import io.ssttkkl.mahjongutils.app.BuildKonfig
 import io.ssttkkl.mahjongutils.app.base.components.ScrollBox
+import io.ssttkkl.mahjongutils.app.base.utils.PlatformUtils
 import io.ssttkkl.mahjongutils.app.components.appscaffold.NoParamUrlNavigationScreen
 import mahjongutils.composeapp.generated.resources.Res
+import mahjongutils.composeapp.generated.resources.title_screen_region_shortcuts
 import mahjongutils.composeapp.generated.resources.title_about
 import mahjongutils.composeapp.generated.resources.title_about_appversion
 import mahjongutils.composeapp.generated.resources.title_about_opensource_licenses
@@ -55,6 +57,14 @@ object AboutScreen : NoParamUrlNavigationScreen() {
                         navigator?.push(OpenSourceLicensesScreen)
                     }
                 )
+                if (PlatformUtils.isDesktop) {
+                    ListItem(
+                        headlineContent = { Text(stringResource(Res.string.title_screen_region_shortcuts)) },
+                        modifier = Modifier.clickable {
+                            navigator?.push(DesktopShortcutSettingsScreen)
+                        }
+                    )
+                }
             }
         }
     }

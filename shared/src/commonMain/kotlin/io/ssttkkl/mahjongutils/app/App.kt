@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import io.ssttkkl.mahjongutils.app.components.appscaffold.AppScaffold
 import io.ssttkkl.mahjongutils.app.components.appscaffold.UrlNavigationScreen
 import io.ssttkkl.mahjongutils.app.screens.about.AboutScreen
+import io.ssttkkl.mahjongutils.app.screens.about.DesktopShortcutSettingsScreen
 import io.ssttkkl.mahjongutils.app.screens.about.OpenSourceLicensesScreen
 import io.ssttkkl.mahjongutils.app.screens.furoshanten.FuroShantenScreen
 import io.ssttkkl.mahjongutils.app.screens.hanhu.HanhuScreen
@@ -20,6 +21,7 @@ private val screenRegistry: Map<String, () -> UrlNavigationScreen<*>> = buildMap
     put(HanhuScreen.path) { HanhuScreen }
     put(AboutScreen.path) { AboutScreen }
     put(OpenSourceLicensesScreen.path) { OpenSourceLicensesScreen }
+    put(DesktopShortcutSettingsScreen.path) { DesktopShortcutSettingsScreen }
 }
 
 private val navigatableScreens = listOf(
