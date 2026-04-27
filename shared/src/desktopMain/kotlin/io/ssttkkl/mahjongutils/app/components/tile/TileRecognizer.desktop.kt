@@ -34,6 +34,8 @@ import kotlinx.coroutines.withContext
 import mahjongutils.composeapp.generated.resources.Res
 import mahjongutils.composeapp.generated.resources.icon_screenshot_frame
 import mahjongutils.composeapp.generated.resources.label_recognize_from_screenshot
+import mahjongutils.composeapp.generated.resources.text_screen_region_hotkey_register_failed
+import mahjongutils.composeapp.generated.resources.text_screen_region_recognizer_failed
 import mahjongutils.composeapp.generated.resources.text_screen_region_recognizer_focus_input_first
 import mahjongutils.composeapp.generated.resources.text_screen_region_recognizer_select_area_first
 import mahjongutils.composeapp.generated.resources.text_screen_region_recognizer_unsupported
@@ -160,6 +162,9 @@ actual fun TileRecognizerHost(
     val focusRequiredMessage = stringResource(Res.string.text_screen_region_recognizer_focus_input_first)
     val noSelectionMessage = stringResource(Res.string.text_screen_region_recognizer_select_area_first)
     val unsupportedMessage = stringResource(Res.string.text_screen_region_recognizer_unsupported)
+    val recognitionFailedMessage = stringResource(Res.string.text_screen_region_recognizer_failed)
+    val hotkeyRegistrationFailedMessage =
+        stringResource(Res.string.text_screen_region_hotkey_register_failed)
     val screenRegionRecognizerController = remember(
         appState,
         tileRecognizer,
@@ -167,7 +172,9 @@ actual fun TileRecognizerHost(
         appOptions.desktopScreenRegionShortcutOptions,
         focusRequiredMessage,
         noSelectionMessage,
-        unsupportedMessage
+        unsupportedMessage,
+        recognitionFailedMessage,
+        hotkeyRegistrationFailedMessage,
     ) {
         ScreenRegionRecognizerController(
             appState = appState,
@@ -177,7 +184,9 @@ actual fun TileRecognizerHost(
             getShortcutOptions = { appOptions.desktopScreenRegionShortcutOptions },
             focusRequiredMessage = focusRequiredMessage,
             noSelectionMessage = noSelectionMessage,
-            unsupportedMessage = unsupportedMessage
+            unsupportedMessage = unsupportedMessage,
+            recognitionFailedMessage = recognitionFailedMessage,
+            hotkeyRegistrationFailedMessage = hotkeyRegistrationFailedMessage,
         )
     }
 

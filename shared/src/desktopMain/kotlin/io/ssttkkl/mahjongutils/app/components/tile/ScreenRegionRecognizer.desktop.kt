@@ -54,16 +54,16 @@ private data class OverlaySelection(
 }
 
 private class SelectionOverlayWindow(
-    private val virtualBounds: Rectangle,
+    private val screenBounds: Rectangle,
+    private val getSelectionState: () -> OverlaySelection?,
+    private val updateSelectionState: (OverlaySelection?) -> Unit,
     private val onSelected: (Rectangle?) -> Unit,
     private val onCancel: () -> Unit,
 ) : JWindow() {
-    private var selectionState: OverlaySelection? = null
-
     init {
         isAlwaysOnTop = true
         background = Color(0, 0, 0, 1)
-        setBounds(virtualBounds)
+        setBounds(screenBounds)
 
         val panel = object : JComponent() {
             override fun paintComponent(graphics: Graphics) {
@@ -76,7 +76,10 @@ private class SelectionOverlayWindow(
                 g2.color = Color(0, 0, 0, 80)
                 g2.fillRect(0, 0, width, height)
 
-                selectionState?.toRectangle()?.takeIf { it.width > 0 && it.height > 0 }?.let { rect ->
+                getSelectionState().toRectangleOrNull()
+                    ?.translateBy(-screenBounds.x, -screenBounds.y)
+                    ?.takeIf { it.width > 0 && it.height > 0 }
+                    ?.let { rect ->
                     g2.color = Color(255, 255, 255, 32)
                     g2.fillRect(rect.x, rect.y, rect.width, rect.height)
                     g2.color = Color(255, 80, 80, 220)
@@ -89,21 +92,27 @@ private class SelectionOverlayWindow(
 
         val mouseAdapter = object : MouseAdapter() {
             override fun mousePressed(e: MouseEvent) {
-                selectionState = OverlaySelection(e.x, e.y, e.x, e.y)
-                panel.repaint()
+                updateSelectionState(
+                    OverlaySelection(e.xOnScreen, e.yOnScreen, e.xOnScreen, e.yOnScreen)
+                )
             }
 
             override fun mouseDragged(e: MouseEvent) {
-                selectionState = selectionState?.copy(currentX = e.x, currentY = e.y)
-                panel.repaint()
+                updateSelectionState(
+                    getSelectionState()?.copy(
+                        currentX = e.xOnScreen,
+                        currentY = e.yOnScreen
+                    )
+                )
             }
 
             override fun mouseReleased(e: MouseEvent) {
-                selectionState = selectionState?.copy(currentX = e.x, currentY = e.y)
-                panel.repaint()
-                onSelected(
-                    selectionState?.toRectangle()?.translateBy(virtualBounds.x, virtualBounds.y)
+                val updatedSelection = getSelectionState()?.copy(
+                    currentX = e.xOnScreen,
+                    currentY = e.yOnScreen
                 )
+                updateSelectionState(updatedSelection)
+                onSelected(updatedSelection.toRectangleOrNull())
             }
         }
 
@@ -124,6 +133,10 @@ private class SelectionOverlayWindow(
         isVisible = true
         toFront()
         requestFocus()
+    }
+
+    fun refresh() {
+        contentPane.repaint()
     }
 }
 
@@ -175,13 +188,16 @@ class ScreenRegionRecognizerController(
     private val focusRequiredMessage: String,
     private val noSelectionMessage: String,
     private val unsupportedMessage: String,
+    private val recognitionFailedMessage: String,
+    private val hotkeyRegistrationFailedMessage: String,
 ) {
     private val logger = LoggerFactory.getLogger("ScreenRegionRecognizerController")
     private val robot = Robot()
-    private val virtualBounds: Rectangle = getVirtualDesktopBounds()
+    private val screenBoundsList: List<Rectangle> = getVirtualScreenBounds()
 
-    private var selectionOverlayWindow: SelectionOverlayWindow? = null
+    private var selectionOverlayWindows: List<SelectionOverlayWindow> = emptyList()
     private var selectionBorderWindow: SelectionBorderWindow? = null
+    private var overlaySelectionState: OverlaySelection? = null
 
     val isSupported = run {
         val osName = System.getProperty("os.name")
@@ -207,10 +223,17 @@ class ScreenRegionRecognizerController(
         closeBorderWindow()
         closeSelectionOverlay()
         isSelecting.value = true
+        logger.info("begin selection with screenBoundsList=$screenBoundsList")
 
-        selectionOverlayWindow = SelectionOverlayWindow(
-            virtualBounds = virtualBounds,
-            onSelected = { rect ->
+        selectionOverlayWindows = screenBoundsList.map { screenBounds ->
+            SelectionOverlayWindow(
+                screenBounds = screenBounds,
+                getSelectionState = { overlaySelectionState },
+                updateSelectionState = { selection ->
+                    overlaySelectionState = selection
+                    selectionOverlayWindows.forEach { it.refresh() }
+                },
+                onSelected = { rect ->
                 val normalized = rect?.normalize()?.takeIf { it.width > 5 && it.height > 5 }
                 if (normalized != null) {
                     selectionRect.value = normalized
@@ -218,10 +241,11 @@ class ScreenRegionRecognizerController(
                 }
                 finishSelection()
             },
-            onCancel = {
-                finishSelection()
-            }
-        ).also { it.open() }
+                onCancel = {
+                    finishSelection()
+                }
+            )
+        }.onEach { it.open() }
     }
 
     fun exitSelection() {
@@ -231,6 +255,7 @@ class ScreenRegionRecognizerController(
             }
             return
         }
+        logger.info("exit selection")
         selectionRect.value = null
         closeBorderWindow()
         finishSelection()
@@ -262,6 +287,7 @@ class ScreenRegionRecognizerController(
         tileRecognizer.coroutineScope.launch {
             closeBorderWindow()
             delay(60)
+            logger.info("recognize selection rect=$rect")
 
             try {
                 val captured = withContext(Dispatchers.IO) {
@@ -275,6 +301,7 @@ class ScreenRegionRecognizerController(
                 }
             } catch (t: Throwable) {
                 logger.error("failed to recognize selection", t)
+                showSnackbar(recognitionFailedMessage)
             } finally {
                 showBorderWindow(rect)
             }
@@ -317,11 +344,23 @@ class ScreenRegionRecognizerController(
     }
 
     fun dispose() {
+        logger.info("dispose screen region recognizer")
         closeBorderWindow()
         closeSelectionOverlay()
     }
 
+    fun notifyHotKeyRegistrationFailure() {
+        showSnackbar(hotkeyRegistrationFailedMessage)
+    }
+
+    private fun showSnackbar(message: String) {
+        tileRecognizer.coroutineScope.launch {
+            appState.snackbarHostState.showSnackbar(message)
+        }
+    }
+
     private fun finishSelection() {
+        overlaySelectionState = null
         closeSelectionOverlay()
         isSelecting.value = false
     }
@@ -339,10 +378,12 @@ class ScreenRegionRecognizerController(
     }
 
     private fun closeSelectionOverlay() {
-        selectionOverlayWindow?.dispose()
-        selectionOverlayWindow = null
+        selectionOverlayWindows.forEach { it.dispose() }
+        selectionOverlayWindows = emptyList()
     }
 }
+
+private fun OverlaySelection?.toRectangleOrNull(): Rectangle? = this?.toRectangle()
 
 private fun DesktopShortcut.matches(event: KeyEvent): Boolean {
     return keyToAwtCode(key) == event.keyCode
@@ -372,22 +413,9 @@ private fun Rectangle.normalize(): Rectangle {
     return Rectangle(left, top, right - left, bottom - top)
 }
 
-private fun getVirtualDesktopBounds(): Rectangle {
-    var left = Int.MAX_VALUE
-    var top = Int.MAX_VALUE
-    var right = Int.MIN_VALUE
-    var bottom = Int.MIN_VALUE
-
-    GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.forEach { device ->
-        val bounds = device.defaultConfiguration.bounds
-        left = min(left, bounds.x)
-        top = min(top, bounds.y)
-        right = max(right, bounds.x + bounds.width)
-        bottom = max(bottom, bounds.y + bounds.height)
-    }
-
-    return Rectangle(left, top, right - left, bottom - top)
-}
+private fun getVirtualScreenBounds(): List<Rectangle> =
+    GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices
+        .map { it.defaultConfiguration.bounds }
 
 private fun keyToAwtCode(key: String): Int = when (key) {
     "ESCAPE" -> KeyEvent.VK_ESCAPE
@@ -456,6 +484,7 @@ private class WindowsGlobalHotKeyDispatcher(
             threadId = kernel32.GetCurrentThreadId()
 
             val registrations = buildRegistrations(getShortcutOptions())
+            var registrationFailed = false
             registrations.forEach { registration ->
                 val success = user32.RegisterHotKey(
                     null,
@@ -464,15 +493,39 @@ private class WindowsGlobalHotKeyDispatcher(
                     keyToAwtCode(registration.shortcut.key)
                 )
                 if (!success) {
-                    logger.warn("failed to register hotkey id=${registration.id} shortcut=${registration.shortcut}")
+                    registrationFailed = true
+                    val errorCode = kernel32.GetLastError()
+                    logger.warn(
+                        "failed to register hotkey id=${registration.id} shortcut=${registration.shortcut.displayText()} errorCode=$errorCode"
+                    )
+                } else {
+                    logger.info(
+                        "registered hotkey id=${registration.id} shortcut=${registration.shortcut.displayText()}"
+                    )
+                }
+            }
+            if (registrationFailed) {
+                EventQueue.invokeLater {
+                    controller.notifyHotKeyRegistrationFailure()
                 }
             }
 
             val msg = WinUser.MSG()
-            while (user32.GetMessage(msg, null, 0, 0) != 0) {
+            while (true) {
+                val result = user32.GetMessage(msg, null, 0, 0)
+                if (result == -1) {
+                    logger.warn("hotkey message loop stopped with GetMessage error=${kernel32.GetLastError()}")
+                    break
+                }
+                if (result == 0) {
+                    break
+                }
                 if (msg.message == WinUser.WM_HOTKEY) {
                     val registration = registrations.firstOrNull { it.id == msg.wParam.toInt() } ?: continue
                     EventQueue.invokeLater {
+                        logger.info(
+                            "received hotkey id=${registration.id} shortcut=${registration.shortcut.displayText()}"
+                        )
                         when (registration.action) {
                             ShortcutAction.StartSelection -> controller.beginSelection()
                             ShortcutAction.RecognizeSelection -> controller.recognizeSelection()
@@ -495,6 +548,7 @@ private class WindowsGlobalHotKeyDispatcher(
 
     override fun close() {
         if (threadId != 0) {
+            logger.info("closing hotkey dispatcher threadId=$threadId")
             user32.PostThreadMessage(threadId, WinUser.WM_QUIT, null, null)
         }
     }

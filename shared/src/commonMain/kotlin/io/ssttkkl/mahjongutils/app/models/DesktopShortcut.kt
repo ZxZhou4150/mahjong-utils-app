@@ -21,9 +21,9 @@ data class DesktopShortcut(
 
 @Serializable
 data class DesktopScreenRegionShortcutOptions(
-    val startSelection: DesktopShortcut = DesktopShortcut("A"),
-    val recognizeSelection: DesktopShortcut = DesktopShortcut("D"),
-    val exitSelection: DesktopShortcut = DesktopShortcut("Q"),
+    val startSelection: DesktopShortcut = DesktopShortcut("A", alt = true),
+    val recognizeSelection: DesktopShortcut = DesktopShortcut("D", alt = true),
+    val exitSelection: DesktopShortcut = DesktopShortcut("Q", alt = true),
 ) {
     fun hasConflict(): Boolean {
         val shortcuts = listOf(startSelection, recognizeSelection, exitSelection)

@@ -32,6 +32,8 @@
     <string name="text_screen_region_recognizer_focus_input_first">Focus a mahjong tile input field first</string>
     <string name="text_screen_region_recognizer_select_area_first">Select a screen area first</string>
     <string name="text_screen_region_recognizer_unsupported">Screen region recognition is only supported on Windows and macOS</string>
+    <string name="text_screen_region_recognizer_failed">Screen region recognition failed. See logs for details.</string>
+    <string name="text_screen_region_hotkey_register_failed">Failed to register one or more global screen-recognition shortcuts. See logs for details.</string>
     <string name="text_screen_region_shortcut_desc">Customize the shortcuts used to select, recognize, and exit the persistent screen capture region.</string>
     <string name="text_screen_region_shortcut_action_select">Start or reselect region</string>
     <string name="text_screen_region_shortcut_action_recognize">Recognize selected region</string>

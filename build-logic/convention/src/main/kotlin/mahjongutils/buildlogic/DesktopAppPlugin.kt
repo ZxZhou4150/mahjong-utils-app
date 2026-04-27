@@ -12,6 +12,7 @@ import org.jetbrains.compose.ComposeExtension
 import org.jetbrains.compose.desktop.DesktopExtension
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
+import java.io.File
 
 class DesktopAppPlugin : Plugin<Project> {
     override fun apply(target: Project): Unit = with(target) {
@@ -45,9 +46,19 @@ class DesktopAppPlugin : Plugin<Project> {
 
         extensions.getByType<ComposeExtension>().extensions.getByType<DesktopExtension>().apply {
             application {
+                providers.gradleProperty("mahjongutils.desktop.javaHome")
+                    .orNull
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let { javaHome = it }
+
                 mainClass = "MainKt"
 
                 nativeDistributions {
+                    providers.gradleProperty("mahjongutils.desktop.outputBaseDir")
+                        .orNull
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let { outputBaseDir.set(File(it)) }
+
                     packageName = APPLICATION_NAME
                     packageVersion = versionName
                     description = APPLICATION_DISPLAY_NAME
